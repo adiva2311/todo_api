@@ -15,7 +15,7 @@ type UserService interface {
 
 type UserServiceImpl struct {
 	UserRepo repositories.UserRepository
-	Db       *sql.DB
+	Db       *sql.DB	
 }
 
 // Register implements UserService.
