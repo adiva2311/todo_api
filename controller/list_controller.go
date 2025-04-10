@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"todo_api/helper"
@@ -27,8 +28,10 @@ func (controller *ListControllerImpl) Create(c echo.Context) error {
 	listPayload := new(helper.ListRequestCreate)
 	err := c.Bind(listPayload)
 	if err != nil {
-		panic(err)
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "Format request tidak valid"})
 	}
+	fmt.Printf("Bind result: %+v\n", listPayload)
+
 
 	// Ambil user_id dari context (bukan "user")
 	userIdInterface := c.Get("user_id")
@@ -47,14 +50,6 @@ func (controller *ListControllerImpl) Create(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Gagal Menambah Data"})
 	}
-	// result, err := controller.ListService.Create(c, helper.ListRequestCreate{
-	// 	Title: listPayload.Title,
-	// 	Information: listPayload.Information,
-	// 	Complete: listPayload.Complete,
-	// })
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Gagal register", "error": err.Error()})
-	// }
 
 	apiResponse := helper.ApiResponse{
 		Status:  http.StatusOK,

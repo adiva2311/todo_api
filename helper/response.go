@@ -41,16 +41,20 @@ func ToLoginResponse(user models.User, token string) LoginResponse {
 }
 
 type ListResponse struct {
-	Title string `json:"title"`
+	Id          uint   `json:"id"`
+	Title       string `json:"title"`
 	Information string `json:"information"`
-	Complete bool `json:"complete"`
-	User UserResponse `json:"user"`
+	Complete    bool   `json:"complete"`
+	UserId      uint   `json:"user_id"`
 }
+
 
 func ToListResponse(list models.List) ListResponse {
 	return ListResponse{
-		Title: list.Title,
+		Id:          list.Id,
+		Title:       list.Title,
 		Information: list.Information,
-		Complete: list.Complete,
+		Complete:    list.Complete,
+		UserId:      list.UserId,
 	}
 }

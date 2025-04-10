@@ -2,6 +2,8 @@ package services
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"todo_api/helper"
 	"todo_api/models"
 	"todo_api/repositories"
@@ -29,13 +31,20 @@ func (service *ListServiceImpl) Create(c echo.Context, request helper.ListReques
 	}
 	defer helper.CommitOrRollback(tx)
 
-	userId := c.Get("user_id").(uint)
+	userIdFloat, ok := c.Get("user_id").(float64)
+	if !ok {
+		return helper.ListResponse{}, errors.New("invalid user_id type in context")
+	}
+	userId := uint(userIdFloat)
 	list := models.List{
 		Title: request.Title,
 		Information: request.Information,
 		Complete: request.Complete,
 		UserId:      userId,
 	}
+
+	fmt.Println("Title masuk:", request.Title)
+	fmt.Println("Information masuk:", request.Information)
 
 	savedList, err := service.ListRepo.Create(c, tx, list)
 	if err != nil{
