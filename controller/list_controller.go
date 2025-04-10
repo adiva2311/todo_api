@@ -30,11 +30,18 @@ func (controller *ListControllerImpl) Create(c echo.Context) error {
 		panic(err)
 	}
 
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	userId := uint(claims["user_id"].(float64))
+	// Ambil user_id dari context (bukan "user")
+	userIdInterface := c.Get("user_id")
+	if userIdInterface == nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Unauthorized"})
+	}
 
-	listPayload.UserId = userId
+	userIdFloat, ok := userIdInterface.(float64)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Invalid user_id type"})
+	}
+
+	listPayload.UserId = uint(userIdFloat)
 
 	result, err := controller.ListService.Create(c, *listPayload)
 	if err != nil {
