@@ -66,7 +66,7 @@ func (controller *UserControllerImpl) Login(c echo.Context) error {
 
 	apiResponse := helper.ApiResponse{
 		Status:  http.StatusOK,
-		Message: "Berhasil Register",
+		Message: "Berhasil Login",
 		Data:    result,
 	}
 	

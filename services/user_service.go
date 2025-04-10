@@ -67,7 +67,7 @@ func (service *UserServiceImpl) Login(c echo.Context, request helper.LoginReques
 		return helper.LoginResponse{}, errors.New("invalid username or password")
 	}
 
-	token, err := helper.GenerateJWT(user.Username)
+	token, err := helper.GenerateJWT(user.Id)
 	if err != nil {
 		return helper.LoginResponse{}, err
 	}

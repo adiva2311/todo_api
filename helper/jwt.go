@@ -9,12 +9,19 @@ import (
 
 var secretKey = []byte(os.Getenv("JWT_SECRET"))
 
-func GenerateJWT(username string) (string, error) {
+func GenerateJWT(userId uint) (string, error) {
 	claims := jwt.MapClaims{
-		"username": username,
+		"user_id":  userId,
 		"exp":      time.Now().Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, _ := token.SignedString(secretKey)
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", err
+	}
 	return tokenString, nil
+}
+
+func GetSecretKey() []byte {
+	return secretKey
 }

@@ -3,6 +3,7 @@ package routes
 import (
 	"todo_api/config"
 	"todo_api/controller"
+	"todo_api/middleware"
 	"todo_api/repositories"
 	"todo_api/services"
 
@@ -19,4 +20,10 @@ func InitRoutes(e *echo.Echo) {
 
 	e.POST("/register", userController.Register)
 	e.POST("/login", userController.Login)
+
+	listRepo := repositories.NewListControllerImpl()
+	listService := services.NewListServiceImpl(listRepo, db)
+	listController := controller.NewListControllerImpl(listService)
+
+	e.POST("/list", listController.Create, middleware.JWTMiddleware)
 }
