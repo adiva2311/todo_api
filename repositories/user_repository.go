@@ -11,7 +11,7 @@ type UserRepositoryImpl struct {
 	//db *sql.DB
 }
 
-// Create implements UserRepository.
+// Register implements UserRepository.
 func (repo *UserRepositoryImpl) Register(c echo.Context, tx *sql.Tx, user models.User) (models.User, error) {
 	query := "INSERT INTO user (name, username, email, password) VALUES (?, ?, ?, ?)"
 	result, err := tx.ExecContext(c.Request().Context(), query, user.Name, user.Username, user.Email, user.Password)
@@ -28,13 +28,13 @@ func (repo *UserRepositoryImpl) Register(c echo.Context, tx *sql.Tx, user models
 	return user, nil
 }
 
-// FindById implements UserRepository.
+// FindByUsername implements UserRepository.
 func (repo *UserRepositoryImpl) FindByUsername(c echo.Context, tx *sql.Tx, username string) (models.User, error) {
-	query := "SELECT name, email, password FROM user WHERE username = ?"
+	query := "SELECT name, username, email, password FROM user WHERE username = ?"
 	rows := tx.QueryRowContext(c.Request().Context(), query, username)
 
 	user := models.User{}
-	err := rows.Scan(&user.Name, &user.Username, &user.Email)
+	err := rows.Scan(&user.Name, &user.Username, &user.Email, &user.Password)
 	if err != nil {
 		return user, err
 	}

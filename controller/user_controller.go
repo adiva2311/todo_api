@@ -11,6 +11,7 @@ import (
 
 type UserController interface {
 	Register(c echo.Context) error
+	Login(c echo.Context) error
 }
 
 type UserControllerImpl struct {
@@ -19,18 +20,17 @@ type UserControllerImpl struct {
 
 // Register implements UserController.
 func (controller *UserControllerImpl) Register(c echo.Context) error {
-	//user := models.User{}
 	userPayload := new(models.User)
-
+	
 	err := c.Bind(userPayload)
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
-
+	
 	result, err := controller.UserService.Register(c, models.User{
-		Name: userPayload.Name,
+		Name:     userPayload.Name,
 		Username: userPayload.Username,
-		Email: userPayload.Email,
+		Email:    userPayload.Email,
 		Password: userPayload.Password,
 	})
 	if err != nil {
@@ -38,13 +38,41 @@ func (controller *UserControllerImpl) Register(c echo.Context) error {
 	}
 
 	apiResponse := helper.ApiResponse{
-		Status: http.StatusOK,
+		Status:  http.StatusOK,
 		Message: "Berhasil Register",
-		Data: result,
+		Data:    result,
 	}
-
+	
 	return c.JSON(http.StatusOK, apiResponse)
 }
+
+// Login implements UserController.
+func (controller *UserControllerImpl) Login(c echo.Context) error {
+	userPayload := new(helper.LoginRequest)
+	
+	err := c.Bind(userPayload)
+	if err != nil {
+		panic(err)
+	}
+
+	result, err := controller.UserService.Login(c, helper.LoginRequest{
+		Username: userPayload.Username,
+		Password: userPayload.Password,
+	})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Gagal Login", "error": err.Error()})
+	}
+
+	apiResponse := helper.ApiResponse{
+		Status:  http.StatusOK,
+		Message: "Berhasil Register",
+		Data:    result,
+	}
+	
+	return c.JSON(http.StatusOK, apiResponse)
+}
+
 
 func NewUserController(userService services.UserService) UserController {
 	return &UserControllerImpl{

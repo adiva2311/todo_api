@@ -12,7 +12,6 @@ type UserResponse struct {
 	Name string `json:"name"`
 	Username string `json:"username"`
 	Email string `json:"email"`
-	Token string `json:"token"`
 }
 
 func ToRegisterResponse(user models.User) UserResponse {
@@ -20,5 +19,21 @@ func ToRegisterResponse(user models.User) UserResponse {
 		Name: user.Name,
 		Username: user.Username,
 		Email: user.Email,
+	}
+}
+
+type LoginResponse struct{
+	Name string `json:"name"`
+	Username string `json:"username"`
+	Email string `json:"email"`
+	Token string `json:"token"`
+}
+
+func ToLoginResponse(user models.User, token string) LoginResponse {
+	return LoginResponse{
+		Name: user.Name,
+		Username: user.Username,
+		Email: user.Email,
+		Token: token,
 	}
 }
