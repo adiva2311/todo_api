@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"todo_api/helper"
 	"todo_api/models"
 	"todo_api/services"
 
@@ -36,7 +37,13 @@ func (controller *UserControllerImpl) Register(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Gagal register", "error": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, result)
+	apiResponse := helper.ApiResponse{
+		Status: http.StatusOK,
+		Message: "Berhasil Register",
+		Data: result,
+	}
+
+	return c.JSON(http.StatusOK, apiResponse)
 }
 
 func NewUserController(userService services.UserService) UserController {
