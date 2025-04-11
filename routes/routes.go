@@ -21,7 +21,7 @@ func InitRoutes(e *echo.Echo) {
 	e.POST("/register", userController.Register)
 	e.POST("/login", userController.Login)
 
-	listRepo := repositories.NewListControllerImpl()
+	listRepo := repositories.NewListRepositoryImpl()
 	listService := services.NewListServiceImpl(listRepo, db)
 	listController := controller.NewListControllerImpl(listService)
 

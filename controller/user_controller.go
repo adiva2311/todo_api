@@ -21,12 +21,12 @@ type UserControllerImpl struct {
 // Register implements UserController.
 func (controller *UserControllerImpl) Register(c echo.Context) error {
 	userPayload := new(models.User)
-	
+
 	err := c.Bind(userPayload)
 	if err != nil {
 		panic(err)
 	}
-	
+
 	result, err := controller.UserService.Register(c, models.User{
 		Name:     userPayload.Name,
 		Username: userPayload.Username,
@@ -42,14 +42,14 @@ func (controller *UserControllerImpl) Register(c echo.Context) error {
 		Message: "Berhasil Register",
 		Data:    result,
 	}
-	
+
 	return c.JSON(http.StatusOK, apiResponse)
 }
 
 // Login implements UserController.
 func (controller *UserControllerImpl) Login(c echo.Context) error {
 	userPayload := new(helper.LoginRequest)
-	
+
 	err := c.Bind(userPayload)
 	if err != nil {
 		panic(err)
@@ -69,10 +69,9 @@ func (controller *UserControllerImpl) Login(c echo.Context) error {
 		Message: "Berhasil Login",
 		Data:    result,
 	}
-	
+
 	return c.JSON(http.StatusOK, apiResponse)
 }
-
 
 func NewUserController(userService services.UserService) UserController {
 	return &UserControllerImpl{

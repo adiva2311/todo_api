@@ -13,7 +13,7 @@ import (
 type ListController interface {
 	Create(c echo.Context) error
 	Update(c echo.Context) error
-	Delete(c echo.Context) error 
+	Delete(c echo.Context) error
 	FindByUserId(c echo.Context) error
 	//FindId(c echo.Context) error
 }
@@ -37,12 +37,12 @@ func (controller *ListControllerImpl) Create(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Unauthorized"})
 	}
 
-	userIdFloat, ok := userIdInterface.(float64)
+	userIdFloat, ok := userIdInterface.(int)
 	if !ok {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Invalid user_id type"})
 	}
 
-	listPayload.UserId = uint(userIdFloat)
+	listPayload.UserId = userIdFloat
 	fmt.Printf("user_id from token: %v\n", listPayload.UserId)
 
 	result, err := controller.ListService.Create(c, *listPayload)
@@ -75,17 +75,17 @@ func (controller *ListControllerImpl) Update(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Unauthorized"})
 	}
 
-	userIdFloat, ok := userIdInterface.(float64)
+	userId, ok := userIdInterface.(float64)
 	if !ok {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Invalid user_id type"})
 	}
-
-	listPayload.UserId = uint(userIdFloat)
+	listPayload.UserId = int(userId)
 	fmt.Printf("user_id from token: %v\n", listPayload.UserId)
-	
+	fmt.Printf("Bind result: %+v\n", listPayload)
+
 	listId := c.Param("list_id")
 	id, err := strconv.Atoi(listId)
-	if err != nil{
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ApiResponse{
 			Status:  http.StatusBadRequest,
 			Message: "ID tidak valid",
@@ -110,17 +110,30 @@ func (controller *ListControllerImpl) Update(c echo.Context) error {
 }
 
 // Delete implements ListController.
-func (controller *ListControllerImpl) Delete(c echo.Context) error  {
-	listId := c.Param("list_id")
-	id, err := strconv.Atoi(listId)
-	if err != nil{
+func (controller *ListControllerImpl) Delete(c echo.Context) error {
+	id := c.Param("list_id")
+	listId, err := strconv.Atoi(id)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ApiResponse{
 			Status:  http.StatusBadRequest,
 			Message: "ID tidak valid",
 		})
 	}
+	fmt.Printf("list_id from token: %v\n", listId)
 
-	controller.ListService.Delete(c, id)
+	// Ambil user_id dari context (bukan "user")
+	userIdInterface := c.Get("user_id")
+	if userIdInterface == nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Unauthorized"})
+	}
+
+	userId, ok := userIdInterface.(float64)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Invalid user_id type"})
+	}
+	fmt.Printf("user_id from token: %v\n", userId)
+
+	controller.ListService.Delete(c, uint(listId), int(userId))
 	apiResponse := helper.ApiResponse{
 		Status:  http.StatusOK,
 		Message: "Berhasil Hapus Data",

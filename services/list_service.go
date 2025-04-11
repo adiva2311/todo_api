@@ -13,8 +13,8 @@ import (
 
 type ListService interface {
 	Create(c echo.Context, request helper.ListRequestCreate) (helper.ListResponse, error)
-	Update(c echo.Context, request helper.ListRequestUpdate) (models.List, error)
-	Delete(c echo.Context, listId int)
+	Update(c echo.Context, request helper.ListRequestUpdate) (helper.ListResponse, error)
+	Delete(c echo.Context, listId uint, userId int) error
 	FindByUserId(c echo.Context, userId int) ([]models.List, error)
 }
 
@@ -26,7 +26,7 @@ type ListServiceImpl struct {
 // Create implements ListService.
 func (service *ListServiceImpl) Create(c echo.Context, request helper.ListRequestCreate) (helper.ListResponse, error) {
 	tx, err := service.Db.Begin()
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 	defer helper.CommitOrRollback(tx)
@@ -37,17 +37,17 @@ func (service *ListServiceImpl) Create(c echo.Context, request helper.ListReques
 	}
 	userId := int(userIdFloat)
 	list := models.List{
-		Title: request.Title,
+		Title:       request.Title,
 		Information: request.Information,
-		Completed: request.Complete,
-		UserId: userId,
+		Completed:   request.Complete,
+		UserId:      userId,
 	}
 
 	fmt.Println("Title masuk:", request.Title)
 	fmt.Println("Information masuk:", request.Information)
 
 	savedList, err := service.ListRepo.Create(c, tx, list)
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 	return helper.ToListResponse(savedList), nil
@@ -56,7 +56,7 @@ func (service *ListServiceImpl) Create(c echo.Context, request helper.ListReques
 // Update implements ListService.
 func (service *ListServiceImpl) Update(c echo.Context, request helper.ListRequestUpdate) (helper.ListResponse, error) {
 	tx, err := service.Db.Begin()
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 	defer helper.CommitOrRollback(tx)
@@ -68,15 +68,15 @@ func (service *ListServiceImpl) Update(c echo.Context, request helper.ListReques
 	userId := int(userIdFloat)
 
 	list := models.List{
-		Id: uint(request.Id),
-		Title: request.Title,
+		Id:          uint(request.Id),
+		Title:       request.Title,
 		Information: request.Information,
-		Completed:  request.Complete,
-		UserId: userId,
+		Completed:   request.Complete,
+		UserId:      userId,
 	}
 
 	updatedList, err := service.ListRepo.Update(c, tx, list)
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 
@@ -84,30 +84,32 @@ func (service *ListServiceImpl) Update(c echo.Context, request helper.ListReques
 }
 
 // Delete implements ListService.
-func (service *ListServiceImpl) Delete(c echo.Context, listId int) {
+func (service *ListServiceImpl) Delete(c echo.Context, listId uint, userId int) error {
 	tx, err := service.Db.Begin()
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 	defer helper.CommitOrRollback(tx)
 
-	userIdFloat := c.Get("user_id").(float64)
-	userId := int(userIdFloat)
-
 	//list := service.ListRepo.FindId(c, tx, listId)
-	service.ListRepo.Delete(c, tx, listId)
+	err = service.ListRepo.Delete(c, tx, listId, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // FindByUserId implements ListService.
 func (service *ListServiceImpl) FindByUserId(c echo.Context, userId int) ([]models.List, error) {
 	tx, err := service.Db.Begin()
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 	defer helper.CommitOrRollback(tx)
 
 	list, err := service.ListRepo.FindByUserId(c, tx, userId)
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 

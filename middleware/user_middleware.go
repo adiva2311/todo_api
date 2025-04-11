@@ -23,17 +23,17 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return helper.GetSecretKey(), nil
 		})
-		
+
 		if err != nil || token == nil || !token.Valid {
 			return c.JSON(http.StatusUnauthorized, echo.Map{"message": "invalid or expired token"})
 		}
-		
+
 		// safe conversion
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			return c.JSON(http.StatusUnauthorized, echo.Map{"message": "cannot parse JWT claims"})
 		}
-		
+
 		userID, ok := claims["user_id"].(float64)
 		if !ok {
 			return c.JSON(http.StatusUnauthorized, echo.Map{"message": "invalid user_id in token"})
