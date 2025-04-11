@@ -37,12 +37,12 @@ func (controller *ListControllerImpl) Create(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Unauthorized"})
 	}
 
-	userIdFloat, ok := userIdInterface.(int)
+	userIdFloat, ok := userIdInterface.(float64)
 	if !ok {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Invalid user_id type"})
 	}
 
-	listPayload.UserId = userIdFloat
+	listPayload.UserId = int(userIdFloat)
 	fmt.Printf("user_id from token: %v\n", listPayload.UserId)
 
 	result, err := controller.ListService.Create(c, *listPayload)
