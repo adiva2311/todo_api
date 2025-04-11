@@ -35,12 +35,12 @@ func (service *ListServiceImpl) Create(c echo.Context, request helper.ListReques
 	if !ok {
 		return helper.ListResponse{}, errors.New("invalid user_id type in context")
 	}
-	userId := uint(userIdFloat)
+	userId := int(userIdFloat)
 	list := models.List{
 		Title: request.Title,
 		Information: request.Information,
-		Complete: request.Complete,
-		UserId:      userId,
+		Completed: request.Complete,
+		UserId: userId,
 	}
 
 	fmt.Println("Title masuk:", request.Title)
@@ -54,24 +54,33 @@ func (service *ListServiceImpl) Create(c echo.Context, request helper.ListReques
 }
 
 // Update implements ListService.
-func (service *ListServiceImpl) Update(c echo.Context, request helper.ListRequestUpdate) (models.List, error) {
+func (service *ListServiceImpl) Update(c echo.Context, request helper.ListRequestUpdate) (helper.ListResponse, error) {
 	tx, err := service.Db.Begin()
 	if err != nil{
 		panic(err)
 	}
 	defer helper.CommitOrRollback(tx)
 
-	list := service.ListRepo.FindId(c, tx, request.Id)
-	list.Title = request.Title
-	list.Information = request.Information
-	list.Complete = request.Complete
+	userIdFloat, ok := c.Get("user_id").(float64)
+	if !ok {
+		return helper.ListResponse{}, errors.New("invalid user_id type in context")
+	}
+	userId := int(userIdFloat)
 
-	list, err = service.ListRepo.Update(c, tx, list)
+	list := models.List{
+		Id: uint(request.Id),
+		Title: request.Title,
+		Information: request.Information,
+		Completed:  request.Complete,
+		UserId: userId,
+	}
+
+	updatedList, err := service.ListRepo.Update(c, tx, list)
 	if err != nil{
 		panic(err)
 	}
 
-	return list, nil
+	return helper.ToListResponse(updatedList), nil
 }
 
 // Delete implements ListService.
@@ -82,8 +91,11 @@ func (service *ListServiceImpl) Delete(c echo.Context, listId int) {
 	}
 	defer helper.CommitOrRollback(tx)
 
-	list := service.ListRepo.FindId(c, tx, listId)
-	service.ListRepo.Delete(c, tx, list)
+	userIdFloat := c.Get("user_id").(float64)
+	userId := int(userIdFloat)
+
+	//list := service.ListRepo.FindId(c, tx, listId)
+	service.ListRepo.Delete(c, tx, listId)
 }
 
 // FindByUserId implements ListService.

@@ -30,11 +30,11 @@ func (repo *UserRepositoryImpl) Register(c echo.Context, tx *sql.Tx, user models
 
 // FindByUsername implements UserRepository.
 func (repo *UserRepositoryImpl) FindByUsername(c echo.Context, tx *sql.Tx, username string) (models.User, error) {
-	query := "SELECT name, username, email, password FROM user WHERE username = ?"
+	query := "SELECT id, name, username, email, password FROM user WHERE username = ?"
 	rows := tx.QueryRowContext(c.Request().Context(), query, username)
 
 	user := models.User{}
-	err := rows.Scan(&user.Name, &user.Username, &user.Email, &user.Password)
+	err := rows.Scan(&user.Id, &user.Name, &user.Username, &user.Email, &user.Password)
 	if err != nil {
 		return user, err
 	}

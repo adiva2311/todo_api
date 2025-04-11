@@ -5,9 +5,9 @@ import (
 )
 
 type ApiResponse struct {
-	Status int
-	Message string
-	Data interface{}
+	Status int `json:"status"`
+	Message string `json:"message"`
+	Data interface{} `json:"data"`
 }
 
 type UserResponse struct {
@@ -44,8 +44,8 @@ type ListResponse struct {
 	Id          uint   `json:"id"`
 	Title       string `json:"title"`
 	Information string `json:"information"`
-	Complete    bool   `json:"complete"`
-	UserId      uint   `json:"user_id"`
+	Completed 	bool   `json:"completed"`
+	UserId 		int	   `json:"user_id"`
 }
 
 
@@ -54,7 +54,7 @@ func ToListResponse(list models.List) ListResponse {
 		Id:          list.Id,
 		Title:       list.Title,
 		Information: list.Information,
-		Complete:    list.Complete,
+		Completed:   list.Completed,
 		UserId:      list.UserId,
 	}
 }

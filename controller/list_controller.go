@@ -7,7 +7,6 @@ import (
 	"todo_api/helper"
 	"todo_api/services"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,7 +31,6 @@ func (controller *ListControllerImpl) Create(c echo.Context) error {
 	}
 	fmt.Printf("Bind result: %+v\n", listPayload)
 
-
 	// Ambil user_id dari context (bukan "user")
 	userIdInterface := c.Get("user_id")
 	if userIdInterface == nil {
@@ -45,6 +43,7 @@ func (controller *ListControllerImpl) Create(c echo.Context) error {
 	}
 
 	listPayload.UserId = uint(userIdFloat)
+	fmt.Printf("user_id from token: %v\n", listPayload.UserId)
 
 	result, err := controller.ListService.Create(c, *listPayload)
 	if err != nil {
@@ -67,8 +66,22 @@ func (controller *ListControllerImpl) Update(c echo.Context) error {
 	listPayload := new(helper.ListRequestUpdate)
 	err := c.Bind(listPayload)
 	if err != nil {
-		panic(err)
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "Format request tidak valid"})
 	}
+
+	// Ambil user_id dari context (bukan "user")
+	userIdInterface := c.Get("user_id")
+	if userIdInterface == nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Unauthorized"})
+	}
+
+	userIdFloat, ok := userIdInterface.(float64)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Invalid user_id type"})
+	}
+
+	listPayload.UserId = uint(userIdFloat)
+	fmt.Printf("user_id from token: %v\n", listPayload.UserId)
 	
 	listId := c.Param("list_id")
 	id, err := strconv.Atoi(listId)
@@ -118,11 +131,21 @@ func (controller *ListControllerImpl) Delete(c echo.Context) error  {
 
 // FindByUserId implements ListController.
 func (controller *ListControllerImpl) FindByUserId(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	userId := uint(claims["user_id"].(float64))
+	// Ambil user_id dari context (bukan "user")
+	userIdInterface := c.Get("user_id")
+	if userIdInterface == nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Unauthorized"})
+	}
 
-	list, err := controller.ListService.FindByUserId(c, int(userId))
+	userIdFloat, ok := userIdInterface.(float64)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Invalid user_id type"})
+	}
+
+	UserId := int(userIdFloat)
+	fmt.Printf("user_id from token: %v\n", UserId)
+
+	list, err := controller.ListService.FindByUserId(c, UserId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

@@ -10,7 +10,7 @@ import (
 type ListRepository interface {
 	Create(c echo.Context, tx *sql.Tx, list models.List) (models.List, error)
 	Update(c echo.Context, tx *sql.Tx, list models.List) (models.List, error)
-	Delete(c echo.Context, tx *sql.Tx, list models.List)
+	Delete(c echo.Context, tx *sql.Tx, listId uint)
 	FindByUserId(c echo.Context, tx *sql.Tx, userId int) ([]models.List, error)
 	FindId(c echo.Context, tx *sql.Tx, userId int) models.List
 }
@@ -20,8 +20,8 @@ type ListRepositoryImpl struct {
 
 // Create implements ListRepository.
 func (repo *ListRepositoryImpl) Create(c echo.Context, tx *sql.Tx, list models.List) (models.List, error) {
-	query := "INSERT INTO list (title, information, complete, user_id) VALUES (?, ?, ?, ?)"
-	result, err := tx.ExecContext(c.Request().Context(), query, list.Title, list.Information, list.Complete, list.UserId)
+	query := "INSERT INTO list (title, information, completed, user_id) VALUES (?, ?, ?, ?)"
+	result, err := tx.ExecContext(c.Request().Context(), query, list.Title, list.Information, list.Completed, list.UserId)
 	if err != nil {
 		panic(err)
 	}
@@ -37,8 +37,8 @@ func (repo *ListRepositoryImpl) Create(c echo.Context, tx *sql.Tx, list models.L
 
 // Update implements ListRepository.
 func (repo *ListRepositoryImpl) Update(c echo.Context, tx *sql.Tx, list models.List) (models.List, error) {
-	query := "UPDATE list SET title = ?, information = ?, complete = ? WHERE id = ?"
-	result, err := tx.ExecContext(c.Request().Context(), query, list.Title, list.Information, list.Complete, list.Id)
+	query := "UPDATE list SET title = ?, information = ?, completed = ? WHERE id = ?"
+	result, err := tx.ExecContext(c.Request().Context(), query, list.Title, list.Information, list.Completed, list.Id)
 	if err != nil {
 		panic(err)
 	}
@@ -52,9 +52,9 @@ func (repo *ListRepositoryImpl) Update(c echo.Context, tx *sql.Tx, list models.L
 }
 
 // Delete implements ListRepository.
-func (repo *ListRepositoryImpl) Delete(c echo.Context, tx *sql.Tx, list models.List) {
+func (repo *ListRepositoryImpl) Delete(c echo.Context, tx *sql.Tx, listId uint) {
 	query := "DELETE FROM list WHERE id = ?"
-	result, err := tx.ExecContext(c.Request().Context(), query, list.Id)
+	result, err := tx.ExecContext(c.Request().Context(), query, listId)
 	if err != nil {
 		panic(err)
 	}
@@ -77,7 +77,7 @@ func (repo *ListRepositoryImpl) FindByUserId(c echo.Context, tx *sql.Tx, userId 
 	var lists []models.List
 	for rows.Next() {
 		var list models.List
-		err := rows.Scan(&list.Id, &list.Title, &list.Information, &list.Complete, &list.UserId)
+		err := rows.Scan(&list.Id, &list.Title, &list.Information, &list.Completed, &list.UserId)
 		if err != nil {
 			panic(err)
 		}
@@ -88,11 +88,11 @@ func (repo *ListRepositoryImpl) FindByUserId(c echo.Context, tx *sql.Tx, userId 
 
 // FindId implements ListRepository.
 func (repo *ListRepositoryImpl) FindId(c echo.Context, tx *sql.Tx, userId int) models.List {
-	query := "SELECT id, title, information, complete, user_id WHERE id = ?"
+	query := "SELECT id, title, information, completed, user_id WHERE id = ?"
 	rows := tx.QueryRowContext(c.Request().Context(), query, userId)
 	
 	list := models.List{}
-	err := rows.Scan(&list.Id, &list.Title, &list.Information, &list.Complete, &list.UserId)
+	err := rows.Scan(&list.Id, &list.Title, &list.Information, &list.Completed, &list.UserId)
 	if err != nil {
 		return list
 	}

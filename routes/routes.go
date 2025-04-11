@@ -26,7 +26,7 @@ func InitRoutes(e *echo.Echo) {
 	listController := controller.NewListControllerImpl(listService)
 
 	e.POST("/list", listController.Create, middleware.JWTMiddleware)
-	e.PUT("/list/:list_id", listController.Create, middleware.JWTMiddleware)
-	e.DELETE("/list/:list_id", listController.Create, middleware.JWTMiddleware)
-	e.GET("/list/", listController.Create, middleware.JWTMiddleware)
+	e.PUT("/list/:list_id", listController.Update, middleware.JWTMiddleware)
+	e.DELETE("/list/:list_id", listController.Delete, middleware.JWTMiddleware)
+	e.GET("/list", listController.FindByUserId, middleware.JWTMiddleware)
 }
