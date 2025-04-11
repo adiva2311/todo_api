@@ -15,7 +15,6 @@ type ListController interface {
 	Update(c echo.Context) error
 	Delete(c echo.Context) error
 	FindByUserId(c echo.Context) error
-	//FindId(c echo.Context) error
 }
 
 type ListControllerImpl struct {
@@ -186,20 +185,6 @@ func (controller *ListControllerImpl) FindByUserId(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, apiResponse)
 }
-
-// FindId implements ListController.
-// func (controller *ListControllerImpl) FindId(c echo.Context) error {
-// 	listId := c.Param("list_id")
-// 	id, err := strconv.Atoi(listId)
-// 	if err != nil{
-// 		return c.JSON(http.StatusBadRequest, helper.ApiResponse{
-// 			Status:  http.StatusBadRequest,
-// 			Message: "ID tidak valid",
-// 		})
-// 	}
-
-// 	controller.ListService.
-// }
 
 func NewListControllerImpl(listService services.ListService) ListController {
 	return &ListControllerImpl{
