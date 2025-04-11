@@ -80,8 +80,6 @@ func (controller *ListControllerImpl) Update(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Invalid user_id type"})
 	}
 	listPayload.UserId = int(userId)
-	fmt.Printf("user_id from token: %v\n", listPayload.UserId)
-	fmt.Printf("Bind result: %+v\n", listPayload)
 
 	listId := c.Param("list_id")
 	id, err := strconv.Atoi(listId)
@@ -93,9 +91,16 @@ func (controller *ListControllerImpl) Update(c echo.Context) error {
 	}
 	listPayload.Id = id
 
+	fmt.Printf("user_id from token: %v\n", listPayload.UserId)
+	fmt.Printf("Bind result: %+v\n", listPayload)
+
 	result, err := controller.ListService.Update(c, *listPayload)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Gagal Mengubah Data"})
+		fmt.Printf("Update error: %v\n", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status":  http.StatusBadRequest,
+			"message": "Gagal Mengubah Data",
+		})
 	}
 
 	apiResponse := helper.ApiResponse{
@@ -119,7 +124,7 @@ func (controller *ListControllerImpl) Delete(c echo.Context) error {
 			Message: "ID tidak valid",
 		})
 	}
-	fmt.Printf("list_id from token: %v\n", listId)
+	fmt.Printf("list_id : %v\n", listId)
 
 	// Ambil user_id dari context (bukan "user")
 	userIdInterface := c.Get("user_id")
@@ -133,7 +138,15 @@ func (controller *ListControllerImpl) Delete(c echo.Context) error {
 	}
 	fmt.Printf("user_id from token: %v\n", userId)
 
-	controller.ListService.Delete(c, uint(listId), int(userId))
+	err = controller.ListService.Delete(c, uint(listId), int(userId))
+	if err != nil {
+		fmt.Printf("Delete error: %v\n", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status":  http.StatusBadRequest,
+			"message": "Gagal Menghapus Data",
+		})
+	}
+
 	apiResponse := helper.ApiResponse{
 		Status:  http.StatusOK,
 		Message: "Berhasil Hapus Data",
@@ -163,7 +176,15 @@ func (controller *ListControllerImpl) FindByUserId(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, list)
+	apiResponse := helper.ApiResponse{
+		Status:  http.StatusOK,
+		Message: "Berhasil Get Data",
+		Data:    list,
+	}
+
+	c.Response().Header().Add("Content-Type", "application/json")
+
+	return c.JSON(http.StatusOK, apiResponse)
 }
 
 // FindId implements ListController.

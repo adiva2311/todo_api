@@ -67,6 +67,11 @@ func (service *ListServiceImpl) Update(c echo.Context, request helper.ListReques
 	}
 	userId := int(userIdFloat)
 
+	_, err = service.ListRepo.FindId(c, tx, uint(request.Id), userId)
+	if err != nil {
+		return helper.ListResponse{}, errors.New("list_id not found")
+	}
+
 	list := models.List{
 		Id:          uint(request.Id),
 		Title:       request.Title,
@@ -91,7 +96,11 @@ func (service *ListServiceImpl) Delete(c echo.Context, listId uint, userId int) 
 	}
 	defer helper.CommitOrRollback(tx)
 
-	//list := service.ListRepo.FindId(c, tx, listId)
+	_, err = service.ListRepo.FindId(c, tx, listId, userId)
+	if err != nil {
+		return errors.New("list_id not found")
+	}
+
 	err = service.ListRepo.Delete(c, tx, listId, userId)
 	if err != nil {
 		return err

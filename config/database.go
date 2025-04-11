@@ -8,7 +8,7 @@ import (
 )
 
 func NewDb() *sql.DB {
-	dsn := "root:12345678@tcp(localhost:3306)/todo_list?parseTime=true"
+	dsn := "root:root@tcp(localhost:3306)/todo_list?parseTime=true"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal("Failed to connect to the database:", err)

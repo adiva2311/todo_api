@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"todo_api/models"
 
 	"github.com/labstack/echo/v4"
@@ -12,7 +13,7 @@ type ListRepository interface {
 	Update(c echo.Context, tx *sql.Tx, list models.List) (models.List, error)
 	Delete(c echo.Context, tx *sql.Tx, listId uint, userId int) error
 	FindByUserId(c echo.Context, tx *sql.Tx, userId int) ([]models.List, error)
-	FindId(c echo.Context, tx *sql.Tx, userId int) models.List
+	FindId(c echo.Context, tx *sql.Tx, listId uint, userId int) (models.List, error)
 }
 
 type ListRepositoryImpl struct {
@@ -88,16 +89,16 @@ func (repo *ListRepositoryImpl) FindByUserId(c echo.Context, tx *sql.Tx, userId 
 }
 
 // FindId implements ListRepository.
-func (repo *ListRepositoryImpl) FindId(c echo.Context, tx *sql.Tx, userId int) models.List {
-	query := "SELECT id, title, information, completed, user_id WHERE id = ?"
-	rows := tx.QueryRowContext(c.Request().Context(), query, userId)
+func (repo *ListRepositoryImpl) FindId(c echo.Context, tx *sql.Tx, listId uint, userId int) (models.List, error) {
+	query := "SELECT id, title, information, completed, user_id FROM list WHERE id = ? AND user_id = ?"
+	rows := tx.QueryRowContext(c.Request().Context(), query, listId, userId)
 
 	list := models.List{}
 	err := rows.Scan(&list.Id, &list.Title, &list.Information, &list.Completed, &list.UserId)
 	if err != nil {
-		return list
+		return list, fmt.Errorf("list dengan ID %d tidak ditemukan", listId)
 	}
-	return list
+	return list, nil
 }
 
 func NewListRepositoryImpl() ListRepository {
